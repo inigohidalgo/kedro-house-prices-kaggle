@@ -2,3 +2,15 @@
 #
 # Documentation for this file format can be found in "The Data Catalog"
 # Link: https://kedro.readthedocs.io/en/stable/data/data_catalog.html
+
+house_prices:
+  type: pandas.CSVDataSet
+  filepath: data/01_raw/house_prices.csv
+  layer: raw
+  load_args:
+    index_col: "Id"
+    sep: ","
+
+intermediate_house_prices:
+  type: pandas.ParquetDataSet
+  filepath: data/02_intermediate/house_prices.pq
