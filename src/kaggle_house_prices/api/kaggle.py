@@ -11,7 +11,7 @@ log = logging.getLogger()
 
 class KaggleDataSet:
     def __init__(self, credentials):
-        required_keys = ["user", "key"]
+        required_keys = ["username", "key"]
         for key in required_keys:
             if key not in credentials:
                 raise KeyError(f"KaggleDataSet requires key {key} in credentials")
