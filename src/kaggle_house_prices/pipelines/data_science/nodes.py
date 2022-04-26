@@ -16,6 +16,8 @@ def train_test_split(*inputs, **kwargs):
     log.debug(f"{len(outputs)} output vectors")
     return outputs
 
+def node_preprocess_df_for_model(df, preprocess_params=None, target_name=None):
+    return preprocess_df_for_model(df, target_name=target_name, **preprocess_params)
 
 def preprocess_df_for_model(
     df: pd.DataFrame,
@@ -60,12 +62,11 @@ def get_model_object(model_name):
 
 
 
-def train_model_on_df(df, model_params):
+def node_train_model_on_Xy(X, y, model_object, model_options):
+    model_init_params = model_options.get("model_init_params", {})
+    model_fit_params = model_options.get("model_fit_params", {})
+    model_instance = model_object(**model_init_params)
+    model_instance.fit(X, y, **model_fit_params)
 
-    model_obj = get_model_object(model_params["model_name"])
-
-    X, y = preprocess_df_for_model(df, target_name=model_params["target_name"], **model_params["model_preprocessing"])
-
-    model_obj.fit(X, y)
-    return model_obj
+    return model_instance
 
