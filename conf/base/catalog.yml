@@ -14,3 +14,15 @@ house_prices:
 intermediate_house_prices:
   type: pandas.ParquetDataSet
   filepath: data/02_intermediate/house_prices.pq
+  layer: intermediate
+
+model_input_table:
+  type: pandas.ParquetDataSet
+  filepath: data/05_model_input/house_model_input_table.pq
+  layer: model_input
+
+trained_model_object:
+  type: pickle.PickleDataSet
+  filepath: data/06_models/house_regressor.pickle
+  versioned: true
+  layer: models
