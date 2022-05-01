@@ -14,7 +14,7 @@ def create_pipeline(**kwargs) -> Pipeline:
         [
             node(
                 func=ds_nodes.train_test_split,
-                inputs=["model_input_table"],
+                inputs=["model_input_table", "params:train_test_split"],
                 outputs=["df_train", "df_test"],
             ),
             node(
