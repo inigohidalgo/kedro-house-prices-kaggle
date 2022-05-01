@@ -6,6 +6,7 @@ import logging
 
 log = logging.getLogger(__name__)
 
+
 def _is_true(series: pd.Series, true_key="Y", false_key=None) -> pd.Series:
     log.info("Wasupp")
     conditions = [series == true_key]
@@ -15,11 +16,16 @@ def _is_true(series: pd.Series, true_key="Y", false_key=None) -> pd.Series:
     else:
         conditions.append(True)
     true_values = np.select(conditions, choices, default=np.nan)
-    true_series = pd.Series(true_values, index=series.index, name=series.name).astype(bool)
+    true_series = pd.Series(true_values, index=series.index, name=series.name).astype(
+        bool
+    )
 
     return true_series
 
-def extract_target_from_df(df, target_name=None, return_Xy=True) -> Union[Tuple[pd.DataFrame, pd.Series], pd.Series]:
+
+def extract_target_from_df(
+    df, target_name=None, return_Xy=True
+) -> Union[Tuple[pd.DataFrame, pd.Series], pd.Series]:
     if target_name is None:
         target_name = "target"
         log.info(f"No target name specified, assuming default: {target_name}")

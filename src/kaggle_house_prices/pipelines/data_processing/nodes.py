@@ -24,7 +24,7 @@ def raw_to_intermediate_houses(houses_dataset):
 
 
 def preprocess_df_for_model(df, model_params=None):
-    #TODO: try to extract config to separate yaml file
+    # TODO: try to extract config to separate yaml file
     preprocess_params = model_params.get("preprocess_params")
     if preprocess_params is None:
         preprocess_params = {}
@@ -43,7 +43,7 @@ def subset_columns(
     drop_columns: list = None,
     keep_columns: list = None,
 ) -> pd.DataFrame:
- 
+
     log.debug(f"Input df shape: {df.shape}")
     cols_in = df.columns
     if numeric_only:

@@ -20,7 +20,11 @@ def train_test_split(input_df, train_test_split_options):
     return outputs
 
 
-def train_model_on_df(train_df, model_class, model_options,):
+def train_model_on_df(
+    train_df,
+    model_class,
+    model_options,
+):
     model_init_params = model_options.get("model_init_params", {})
     model_fit_params = model_options.get("model_fit_params", {})
     model_object = model_class(**model_init_params)
@@ -36,9 +40,11 @@ def get_model_class(model_name):
     """
     if model_name == "rforest":
         from sklearn.ensemble import RandomForestRegressor
+
         return RandomForestRegressor
     elif model_name == "elastic":
         from sklearn.linear_model import ElasticNet
+
         return ElasticNet
     else:
         raise ValueError(f"Unknown model name: {model_name}")

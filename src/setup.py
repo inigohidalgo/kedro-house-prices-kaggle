@@ -1,8 +1,6 @@
 from setuptools import find_packages, setup
 
-entry_point = (
-    "kaggle-house-prices = kaggle_house_prices.__main__:main"
-)
+entry_point = "kaggle-house-prices = kaggle_house_prices.__main__:main"
 
 
 # get the dependencies and installs

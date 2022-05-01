@@ -8,7 +8,6 @@ from kedro.pipeline import Pipeline, node, pipeline
 from kaggle_house_prices.pipelines.data_science import nodes as ds_nodes
 
 
-
 def create_pipeline(**kwargs) -> Pipeline:
     return pipeline(
         [
