@@ -1,0 +1,12 @@
+model_options:
+  preprocess_params:
+    drop_columns: 
+      - LotFrontage # 18% na
+      # TODO: process NAs
+      # temp
+      - MasVnrArea
+      - GarageYrBlt
+  model_init_params:
+    n_jobs: 3
+  target_name: SalePrice
+  model_name: rforest # todo: split into library and type lgbm - regressor
