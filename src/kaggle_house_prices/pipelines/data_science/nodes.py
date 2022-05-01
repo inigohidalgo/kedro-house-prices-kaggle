@@ -13,21 +13,21 @@ from kaggle_house_prices.utils import data_processing_utils as dp_utils
 log = logging.getLogger(__name__)
 
 
-def train_test_split(*inputs, **kwargs):
-    log.debug(f"{len(inputs)} input vectors")
-    outputs = model_selection.train_test_split(*inputs, **kwargs)
-    log.debug(f"{len(outputs)} output vectors")
+def train_test_split(input_df, train_test_split_options):
+    # log.debug(f"{len(inputs)} input vectors")
+    outputs = model_selection.train_test_split(input_df, **train_test_split_options)
+    # log.debug(f"{len(outputs)} output vectors")
     return outputs
 
 
-def train_model_on_df(train_df, model_object, model_options,):
+def train_model_on_df(train_df, model_class, model_options,):
     model_init_params = model_options.get("model_init_params", {})
     model_fit_params = model_options.get("model_fit_params", {})
-    model_instance = model_object(**model_init_params)
+    model_object = model_class(**model_init_params)
     X, y = dp_utils.extract_target_from_df(train_df, model_options.get("target_name"))
-    model_instance.fit(X, y, **model_fit_params)
+    model_object.fit(X, y, **model_fit_params)
 
-    return model_instance
+    return model_object
 
 
 def get_model_class(model_name):
