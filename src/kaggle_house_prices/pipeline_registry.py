@@ -3,7 +3,7 @@ from typing import Dict
 
 from kedro.pipeline import Pipeline, pipeline
 
-from kaggle_house_prices.pipelines import data_processing as dp
+from kaggle_house_prices.pipelines import data_processing as dp, data_science as ds
 
 
 def register_pipelines() -> Dict[str, Pipeline]:
@@ -12,9 +12,11 @@ def register_pipelines() -> Dict[str, Pipeline]:
     Returns:
         A mapping from a pipeline name to a ``Pipeline`` object.
     """
-    raw_to_intermediate_pipeline = dp.create_pipeline()
+    data_processing = dp.create_pipeline()
+    data_science = ds.create_pipeline()
 
     return {
         "__default__": pipeline([]),
-        "raw_to_intermediate": raw_to_intermediate_pipeline,
+        "dp": data_processing,
+        "ds": data_science,
     }
