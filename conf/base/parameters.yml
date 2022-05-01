@@ -1,3 +1,6 @@
+train_test_split:
+  random_state: 420
+
 model_options:
   preprocess_params:
     drop_columns: 
