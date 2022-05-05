@@ -6,10 +6,12 @@ def get_date_from_columns(df, column_dictionary, default_values=None):
     Constructs a datetime column from multiple columns present in `df`
 
     :param df: DataFrame containing the columns to be used to construct the datetime column (type: pd.DataFrame)
-    :param column_dictionary: Dictionary containing the column names to be used to construct the datetime column (type: dict)
+    :param column_dictionary: Dictionary containing the column names to be used to construct the datetime column
+        (type: dict)
         - Keys: Datetime component names (type: str)
         - Values: Column names (type: str)
-    :param default_values: Dictionary containing the default values to be used for the datetime components (type: dict, optional)
+    :param default_values: Dictionary containing the default values to be used for the datetime components
+        (type: dict, optional)
         - Keys: Datetime component names (type: str)
         - Values: Default values (type: int)
     :return: Datetime column (type: pd.Series)

@@ -17,9 +17,7 @@ log = logging.getLogger(__name__)
 def raw_to_intermediate_houses(houses_dataset):
     houses_dataset["CentralAir"] = dp_utils._is_true(houses_dataset["CentralAir"])
 
-    houses_dataset["DtSold"] = dt_utils.get_date_from_columns(
-        houses_dataset, {"year": "YrSold", "month": "MoSold"}
-    )
+    houses_dataset["DtSold"] = dt_utils.get_date_from_columns(houses_dataset, {"year": "YrSold", "month": "MoSold"})
     return houses_dataset
 
 
