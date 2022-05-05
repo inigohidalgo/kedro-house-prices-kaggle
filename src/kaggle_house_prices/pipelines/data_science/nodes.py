@@ -4,24 +4,21 @@ generated using Kedro 0.18.0
 """
 import logging
 
-import pandas as pd
-import numpy as np
 from sklearn import model_selection
 
 from mlflow import (
     log_metric,
     log_param,
-    log_artifacts,
     set_tracking_uri,
-    set_experiment,
 )
-
-set_tracking_uri("http://127.0.0.1:12347/")
 
 from kaggle_house_prices.utils import (
     data_processing_utils as dp_utils,
     performance as performance_utils,
 )
+
+set_tracking_uri("http://127.0.0.1:12347/")
+
 
 log = logging.getLogger(__name__)
 
