@@ -4,8 +4,6 @@ generated using Kedro 0.18.0
 """
 import logging
 
-import pandas as pd
-import numpy as np
 from sklearn import model_selection
 
 from kaggle_house_prices.utils import data_processing_utils as dp_utils

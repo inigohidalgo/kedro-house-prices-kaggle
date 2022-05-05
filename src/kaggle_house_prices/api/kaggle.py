@@ -29,9 +29,7 @@ class KaggleDataSet:
 
     def load_competition_dataset(self, competition_name, dataset_name, **kwargs):
         with tempfile.TemporaryDirectory() as temp_dir:
-            dataset_path = self._download_single_competition_file(
-                competition_name, dataset_name, temp_dir
-            )
+            dataset_path = self._download_single_competition_file(competition_name, dataset_name, temp_dir)
             if dataset_name.endswith(".csv"):
                 dataset = pd.read_csv(dataset_path, **kwargs)
             elif dataset_name.endswith(".xlsx"):
@@ -41,9 +39,7 @@ class KaggleDataSet:
 
             return dataset
 
-    def _download_all_competition_files(
-        self, competition_name, path=None
-    ) -> List[Path]:
+    def _download_all_competition_files(self, competition_name, path=None) -> List[Path]:
 
         competition_files = self.api.competition_list_files(competition_name)
         if path is None:
@@ -54,16 +50,12 @@ class KaggleDataSet:
         log.debug(f"Files {', '.join(competition_files)} downloaded to {path}")
         return [path / file_name for file_name in competition_files]
 
-    def _download_single_competition_file(
-        self, competition_name, file_name, path=None
-    ) -> Path:
+    def _download_single_competition_file(self, competition_name, file_name, path=None) -> Path:
         if path is None:
             path = Path()
         else:
             path = Path(path)
-        self.api.competition_download_file(
-            competition_name, file_name, path, quiet=True
-        )
+        self.api.competition_download_file(competition_name, file_name, path, quiet=True)
         log.debug(f"File {file_name} downloaded to {path}")
 
         return path / file_name

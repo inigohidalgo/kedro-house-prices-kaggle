@@ -3,7 +3,7 @@ train_test_split:
 
 model_options:
   preprocess_params:
-    drop_columns: 
+    drop_columns:
       - LotFrontage # 18% na
       # TODO: process NAs
       # temp
