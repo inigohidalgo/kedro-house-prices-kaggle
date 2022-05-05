@@ -3,6 +3,7 @@ import logging
 
 log = logging.getLogger(__name__)
 
+
 def get_scoring_function(function_name):
     log.debug(f"Getting scoring function {function_name}")
     metrics_dict = {

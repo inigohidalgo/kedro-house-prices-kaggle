@@ -8,14 +8,22 @@ import pandas as pd
 import numpy as np
 from sklearn import model_selection
 
-from mlflow import log_metric, log_param, log_artifacts, set_tracking_uri, set_experiment
+from mlflow import (
+    log_metric,
+    log_param,
+    log_artifacts,
+    set_tracking_uri,
+    set_experiment,
+)
 
 set_tracking_uri("http://127.0.0.1:12347/")
 
-from kaggle_house_prices.utils import data_processing_utils as dp_utils, performance as performance_utils
+from kaggle_house_prices.utils import (
+    data_processing_utils as dp_utils,
+    performance as performance_utils,
+)
 
 log = logging.getLogger(__name__)
-
 
 
 def train_test_split(input_df, train_test_split_options):
@@ -42,7 +50,6 @@ def train_model_on_df(
         scoring_function = performance_utils.get_scoring_function(scoring_function_name)
         score = scoring_function(y, model_object.predict(X))
         log_metric(scoring_function_name, score)
-    
 
     return model_object
 
