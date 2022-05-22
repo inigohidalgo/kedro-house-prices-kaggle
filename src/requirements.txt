@@ -10,6 +10,7 @@ kedro-telemetry~=0.2.0
 kedro-viz~=4.0; python_version < '3.9'
 mlflow
 nbstripout~=0.4
+optuna
 pandas
 pre-commit
 plotly
