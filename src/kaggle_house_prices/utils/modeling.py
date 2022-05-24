@@ -9,6 +9,7 @@ from typing import Mapping
 
 logger = logging.getLogger()
 
+# TODO SMELL: should be able to abstract this out of this file. decouple
 def get_model_class(model_type: Literal["regression", "classification"], model_name: str) -> type[AbstractGenericModel]:
     regression_models = {
         "rforest": sk_ensemble.RandomForestRegressor,
