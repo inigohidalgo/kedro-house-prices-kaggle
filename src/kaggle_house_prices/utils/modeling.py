@@ -3,10 +3,11 @@ from __future__ import annotations
 from typing import Literal, Optional
 from sklearn import ensemble as sk_ensemble, linear_model as sk_lm  # type: ignore
 import pandas as pd
-
+import logging
 
 from typing import Mapping
 
+logger = logging.getLogger()
 
 def get_model_class(model_type: Literal["regression", "classification"], model_name: str) -> type[AbstractGenericModel]:
     regression_models = {
@@ -64,7 +65,9 @@ class AbstractGenericModel(Fitter, Predictor, Protocol):
     # def predict(self, X, **kwargs):
     #     ...
 
+
 from typing import Generic
+
 
 class GenericModel(AbstractGenericModel):
     def __init__(self, model_class):
@@ -81,33 +84,43 @@ class TargetGenericModel(AbstractGenericModel, Protocol):
     def fit(self, X):
         ...
 
+
 from numbers import Number
 
 
 class Key(Number, str):
     ...
 
+
 # KeyT = TypeVar("KeyT", bound=Key, contravariant=True)
+
 
 class BaseCombinedModel(AbstractGenericModel):
     """Generic model that can make multiple predictions"""
+
     # target_model_classes: Optional[Mapping[KeyT, type[GenericModel]]]
 
     def __init__(
         self,
-        model_classes: Optional[Mapping[Key, type[GenericModel]]] = None,
+        model_classes: Optional[Mapping[Any, type[GenericModel]]] = None,
         model_init_params: Optional[Mapping] = None,
+        model_objects: Optional[Mapping[Any, GenericModel]] = None,
     ):
-        if not model_classes:
+        if model_classes and not model_objects:
             self.target_model_classes = model_classes
+            self._models_instantiated = False
+        elif model_objects:
+            self.model_objects = model_objects
+            self._models_instantiated = True
 
         if not model_init_params:
             model_init_params = {}
         self.model_init_params = model_init_params
         self.models_instantiated = False
 
-    def fit(self, X, **kwargs):
-        ...
+    def fit(self, X, model_init_kwargs=None, **kwargs):
+        
+        self.instantiate_model_objects()
         # for model_object in self.target_model_objects.values():
         #     model_object.fit(X, **kwargs)
 
@@ -121,19 +134,23 @@ class BaseCombinedModel(AbstractGenericModel):
         #     predictions[target_name] = model_object.predict(X)
         # return self.model_class.predict(X)
 
-    def instantiate_model_objects(self):
-        self.model_objects = {}
-        for target_name, model_class in self.target_model_classes.items():
-            self.target_model_objects[target_name] = model_class(
-                **self.model_init_params[target_name],
-            )
+    def instantiate_model_objects(self, **additional_model_init_kwargs):
+        if not self._models_instantiated:
+            self.model_objects = {}
+            for target_name, model_class in self.target_model_classes.items():
+                model_init_kwargs = {**self.model_init_params[target_name], **additional_model_init_kwargs}
+                self.target_model_objects[target_name] = model_class(
+                    **model_init_kwargs,
+                )
+        else:
+            logger.warning("Model objects already instantiated")
 
 
 from typing import Iterable
 
 
 class QuantileModel(BaseCombinedModel):
-    def __init__(self, model_class: type[GenericModel], quantiles : Iterable[Number], **kwargs):
+    def __init__(self, model_class: type[GenericModel], quantiles: Iterable[Number], **kwargs):
         model_classes = {quantile: model_class for quantile in quantiles}
         super().__init__(model_classes=model_classes, **kwargs)
         self.quantiles = quantiles
