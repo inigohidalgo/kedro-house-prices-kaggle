@@ -1,16 +1,33 @@
 from __future__ import annotations
 
-from typing import Literal, Optional
-from sklearn import ensemble as sk_ensemble, linear_model as sk_lm  # type: ignore
-import pandas as pd
 import logging
+from numbers import Number
+import abc
+from typing import (
+    Any,
+    Generic,
+    Iterable,
+    Literal,
+    Mapping,
+    Optional,
+    Protocol,
+    TypeVar,
+    Type,
+    Union,
+    overload,
+    runtime_checkable,
+)
 
-from typing import Mapping
+import numpy as np
+import pandas as pd
+from sklearn import ensemble as sk_ensemble  # type: ignore
+from sklearn import linear_model as sk_lm
 
 logger = logging.getLogger()
 
+
 # TODO SMELL: should be able to abstract this out of this file. decouple
-def get_model_class(model_type: Literal["regression", "classification"], model_name: str) -> type[AbstractGenericModel]:
+def get_model_class(model_type: Literal["regression", "classification"], model_name: str) -> Type[AbstractGenericModel]:
     regression_models = {
         "rforest": sk_ensemble.RandomForestRegressor,
         "elasticnet": sk_lm.ElasticNet,
@@ -29,48 +46,37 @@ def get_model_class(model_type: Literal["regression", "classification"], model_n
     return models[model_type][model_name]
 
 
-from typing import runtime_checkable, Protocol, Any, Union, overload, TypeVar
-import numpy as np
-
-Table = TypeVar("Table", np.ndarray, pd.DataFrame)
+# Table = TypeVar("Table", np.ndarray, pd.DataFrame)
+Table = Union[np.ndarray, pd.DataFrame]
 
 
 @runtime_checkable
 class Predictor(Protocol):
-    # @overload
-    def predict(self, X):
+    @abc.abstractmethod
+    def predict(self, X, **kwargs):
         ...
 
 
 class Fitter(Protocol):
+    @abc.abstractmethod
     @overload
-    def fit(self, X, y):
+    def fit(self, X, y, **kwargs):
         ...
 
     @overload
-    def fit(self, X):
+    @abc.abstractmethod
+    def fit(self, X, **kwargs):
         ...
 
 
 @runtime_checkable
 class AbstractGenericModel(Fitter, Predictor, Protocol):
-    # def __init__(self, model_class, model_init_params: Optional[Mapping] = None):
-    #     self.model_class = model_class
-    #     if not model_init_params:
-    #         model_init_params = {}
-    #     self.model_init_params = model_init_params
     ...
-    # def fit(self, X, y, **kwargs):
-    #     ...
-
-    # def predict(self, X, **kwargs):
-    #     ...
-
-
-from typing import Generic
 
 
 class GenericModel(AbstractGenericModel):
+    model_class: AbstractGenericModel
+
     def __init__(self, model_class):
         self.model_class = model_class
 
@@ -86,54 +92,56 @@ class TargetGenericModel(AbstractGenericModel, Protocol):
         ...
 
 
-from numbers import Number
+KeyTs = Union[Number, str]
+KeyT = TypeVar("KeyT", bound=KeyTs)
+ModelObjMap = Mapping[KeyT, GenericModel]
+ModelClsMap = Mapping[KeyT, Type[GenericModel]]
 
 
-class Key(Number, str):
-    ...
-
-
-# KeyT = TypeVar("KeyT", bound=Key, contravariant=True)
-
-
-class BaseCombinedModel(AbstractGenericModel):
+class BaseCombinedModel(AbstractGenericModel, Generic[KeyT]):
     """Generic model that can make multiple predictions"""
+    _models_instantiated: bool
 
-    # target_model_classes: Optional[Mapping[KeyT, type[GenericModel]]]
+    # target_model_classes: Optional[Mapping[KeyT, Type[GenericModel]]]
 
     def __init__(
         self,
-        model_classes: Optional[Mapping[Any, type[GenericModel]]] = None,
+        model_classes: Optional[ModelClsMap] = None,
         model_init_params: Optional[Mapping] = None,
-        model_objects: Optional[Mapping[Any, GenericModel]] = None,
+        model_objects: Optional[ModelObjMap] = None,
     ):
         if model_classes and not model_objects:
-            self.target_model_classes = model_classes
+            self.target_model_classes: ModelClsMap = model_classes
             self._models_instantiated = False
         elif model_objects:
-            self.model_objects = model_objects
+            self.target_model_objects: ModelObjMap = model_objects
             self._models_instantiated = True
+        else:
+            raise NotImplementedError(
+                f"Must instantiate f{type(self).__name__} with either model_classes or model_objects"
+            )
 
         if not model_init_params:
             model_init_params = {}
         self.model_init_params = model_init_params
-        self.models_instantiated = False
 
     def fit(self, X, model_init_kwargs=None, **kwargs):
-        
+
         self.instantiate_model_objects()
         # for model_object in self.target_model_objects.values():
         #     model_object.fit(X, **kwargs)
 
-    def predict(self, X: Table):
-        ...
+    # @abc.abstractmethod
+    def predict(self, X: Table, **kwargs) -> pd.DataFrame:
+        predictions = pd.DataFrame()
+        # TODO: explicit index handling
         # try:
-        #     predictions = pd.DataFrame(index=X.index)
+        #     predictions.index = X.index
         # except AttributeError:
-        #     predictions = np.empty(X.shape[0])
-        # for target_name, model_object in self.target_model_objects.items():
-        #     predictions[target_name] = model_object.predict(X)
-        # return self.model_class.predict(X)
+        #     predictions.index = pd.RangeIndex(X.shape[0])
+        for target_name, model_object in self.target_model_objects.items():
+            predictions[target_name] = model_object.predict(X, **kwargs)
+        return predictions
 
     def instantiate_model_objects(self, **additional_model_init_kwargs):
         if not self._models_instantiated:
@@ -147,11 +155,8 @@ class BaseCombinedModel(AbstractGenericModel):
             logger.warning("Model objects already instantiated")
 
 
-from typing import Iterable
-
-
-class QuantileModel(BaseCombinedModel):
-    def __init__(self, model_class: type[GenericModel], quantiles: Iterable[Number], **kwargs):
+class QuantileModel(BaseCombinedModel[Number]):
+    def __init__(self, model_class: Type[GenericModel], quantiles: Iterable[Number], **kwargs):
         model_classes = {quantile: model_class for quantile in quantiles}
         super().__init__(model_classes=model_classes, **kwargs)
         self.quantiles = quantiles
