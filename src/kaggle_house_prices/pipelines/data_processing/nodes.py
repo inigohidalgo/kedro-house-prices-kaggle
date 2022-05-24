@@ -7,8 +7,8 @@ import pandas as pd
 import numpy as np
 import logging
 from kaggle_house_prices.utils import (
-    date_utils as dt_utils,
-    data_processing_utils as dp_utils,
+    datetime as dt_utils,
+    data_processing as dp_utils,
 )
 
 log = logging.getLogger(__name__)

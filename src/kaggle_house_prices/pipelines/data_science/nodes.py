@@ -13,7 +13,7 @@ from mlflow import (
 )
 
 from kaggle_house_prices.utils import (
-    data_processing_utils as dp_utils,
+    data_processing as dp_utils,
     performance as performance_utils,
 )
 
