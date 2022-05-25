@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import logging
 from numbers import Number
 import abc
@@ -26,24 +24,7 @@ from sklearn import linear_model as sk_lm
 logger = logging.getLogger()
 
 
-# TODO SMELL: should be able to abstract this out of this file. decouple
-def get_model_class(model_type: Literal["regression", "classification"], model_name: str) -> Type[AbstractGenericModel]:
-    regression_models = {
-        "rforest": sk_ensemble.RandomForestRegressor,
-        "elasticnet": sk_lm.ElasticNet,
-    }
 
-    classification_models = {
-        "rforest": sk_ensemble.RandomForestClassifier,
-        # "logistic": sk_lm.LogisticClassifier,
-    }
-
-    models = {
-        "regression": regression_models,
-        "classification": classification_models,
-    }
-
-    return models[model_type][model_name]
 
 
 # Table = TypeVar("Table", np.ndarray, pd.DataFrame)
@@ -74,6 +55,15 @@ class AbstractGenericModel(Fitter, Predictor, Protocol):
     ...
 
 
+@runtime_checkable
+class TargetGenericModel(AbstractGenericModel, Protocol):
+    target_name: str
+    
+    @abc.abstractmethod
+    def fit(self, data, **kwargs):
+        ...
+
+
 class GenericModel(AbstractGenericModel):
     model_class: AbstractGenericModel
 
@@ -84,12 +74,19 @@ class GenericModel(AbstractGenericModel):
         return self.model_class.predict(X, **kwargs)
 
 
-@runtime_checkable
-class TargetGenericModel(AbstractGenericModel, Protocol):
-    target_name: str
+class TargetModel(TargetGenericModel, GenericModel):
+    def __init__(self, model_class, target_name):
+        GenericModel.__init__(model_class)
+        self.target_name = target_name
 
-    def fit(self, X):
-        ...
+    def fit(self, data: pd.DataFrame, **kwargs):
+        X, y = self.get_Xy_from_data(data)
+        GenericModel.fit(X, y, **kwargs)
+
+    def get_Xy_from_data(self, data: pd.DataFrame):
+        X = data.drop(self.target_name, axis=1)
+        y = data[self.target_name]
+        return X, y
 
 
 KeyTs = Union[Number, str]
@@ -100,6 +97,7 @@ ModelClsMap = Mapping[KeyT, Type[GenericModel]]
 
 class BaseCombinedModel(AbstractGenericModel, Generic[KeyT]):
     """Generic model that can make multiple predictions"""
+
     _models_instantiated: bool
 
     # target_model_classes: Optional[Mapping[KeyT, Type[GenericModel]]]
@@ -160,3 +158,23 @@ class QuantileModel(BaseCombinedModel[Number]):
         model_classes = {quantile: model_class for quantile in quantiles}
         super().__init__(model_classes=model_classes, **kwargs)
         self.quantiles = quantiles
+
+
+# TODO SMELL: should be able to abstract this out of this file. decouple
+def get_model_class(model_type: Literal["regression", "classification"], model_name: str) -> Type[AbstractGenericModel]:
+    regression_models = {
+        "rforest": sk_ensemble.RandomForestRegressor,
+        "elasticnet": sk_lm.ElasticNet,
+    }
+
+    classification_models = {
+        "rforest": sk_ensemble.RandomForestClassifier,
+        # "logistic": sk_lm.LogisticClassifier,
+    }
+
+    models = {
+        "regression": regression_models,
+        "classification": classification_models,
+    }
+
+    return models[model_type][model_name]
