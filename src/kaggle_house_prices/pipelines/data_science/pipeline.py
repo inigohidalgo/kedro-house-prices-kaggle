@@ -17,7 +17,7 @@ def create_pipeline(**kwargs) -> Pipeline:
                 outputs=["df_train", "df_test"],
             ),
             node(
-                func=ds_nodes.get_model_class,
+                func=ds_nodes.load_model,
                 inputs=["params:model_options.model_name"],
                 outputs="model_class",
             ),
