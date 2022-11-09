@@ -23,3 +23,44 @@ addopts = """
 fail_under = 0
 show_missing = true
 exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
+
+[tool.pdm]
+
+[project]
+name = "kaggle_house_prices"
+version = "0.0.1"
+description = ""
+authors = [
+    {name = "Iñigo Hidalgo", email = "inigohrey@gmail.com"},
+]
+dependencies = [
+    "black~=22.0",
+    "flake8>=3.7.9, <4.0",
+    "ipython>=7.31.1, <8.0",
+    "isort~=5.0",
+    "jupyter~=1.0",
+    "jupyterlab~=3.0",
+    "kaggle",
+    "kedro[pandas]==0.18.0",
+    "kedro-telemetry~=0.2.0",
+    "kedro-viz~=4.0",
+    "mlflow",
+    "nbstripout~=0.4",
+    "optuna",
+    "pandas",
+    "pre-commit",
+    "plotly",
+    "pytest-cov~=3.0",
+    "pytest-mock>=1.7.1, <2.0",
+    "pytest~=6.2",
+    "scikit-learn"
+]
+requires-python = ">=3.8,<3.11"
+license = {text = "MIT"}
+
+[build-system]
+requires = ["pdm-pep517>=1.0.0"]
+build-backend = "pdm.pep517.api"
+
+[project.scripts]
+kaggle-house-prices = "kaggle_house_prices.__main__:main"
